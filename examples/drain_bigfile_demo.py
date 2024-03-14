@@ -18,7 +18,7 @@ in_gz_file = "SSH.tar.gz"
 in_log_file = "SSH.log"
 if not os.path.isfile(in_log_file):
     logger.info(f"Downloading file {in_gz_file}")
-    p = subprocess.Popen(f"curl https://zenodo.org/record/3227177/files/{in_gz_file} --output {in_gz_file}", shell=True)
+    p = subprocess.Popen(f"curl https://zenodo.org/records/3227177/files/{in_gz_file} --output {in_gz_file}", shell=True)
     p.wait()
     logger.info(f"Extracting file {in_gz_file}")
     p = subprocess.Popen(f"tar -xvzf {in_gz_file}", shell=True)
