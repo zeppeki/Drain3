@@ -11,6 +11,9 @@ from collections import defaultdict
 from drain3 import TemplateMiner
 from drain3.template_miner_config import TemplateMinerConfig
 
+from drain3.masking import MaskingInstruction
+from drain3.masking import LogMasker
+
 logger = logging.getLogger(__name__)
 logging.basicConfig(stream=sys.stdout, level=logging.INFO, format="%(message)s")
 
@@ -92,6 +95,8 @@ datasets = [
     "Thunderbird",
 ]
 
+# datasets = ["BGL"]
+
 
 def calculate_accuracy(ground_truth, predicted_template):
     correct = 0
@@ -115,20 +120,129 @@ def predict(template_miner, log_line):
     return template
 
 
+benchmark_settings = {
+    "BGL": {
+        "regex": [
+            {
+                "regex_pattern": "core\\.\\d+",
+                "mask_with": "CORE",
+            }
+        ]
+    },
+    "HDFS": {
+        "regex": [
+            {
+                "regex_pattern": "blk_-?\\d+",
+                "mask_with": "BLK-ID",
+            },
+            {
+                "regex_pattern": "(/|)(\\d+\\.){3}\\d+(:\\d+|)",
+                "mask_with": "IP-ADDR",
+            },
+        ]
+    },
+    "HPC": {
+        "regex": [
+            {
+                "regex_pattern": "=\\d+",
+                "mask_with": "EQNUM",
+            }
+        ]
+    },
+    "OpenSSH": {
+        "regex": [
+            {
+                "regex_pattern": "(\\d+\.){3}\\d+",
+                "mask_with": "IP-ADDR",
+            },
+            {
+                "regex_pattern": "([\\w-]+\\.){2,}[\\w-]+",
+                "mask_with": "HOSTNAME",
+            },
+        ]
+    },
+    "OpenStack": {
+        "regex": [
+            {
+                "regex_pattern": "\\[instance:\\s*(.*?)\\]",
+                "mask_with": "INSTANCE",
+            },
+            {
+                "regex_pattern": "((\\d+\\.){3}\\d+,?)+",
+                "mask_with": "IP-ADDR",
+            },
+            {
+                "regex_pattern": "/.+?\\s",
+                "mask_with": "PATH",
+            },
+            {
+                "regex_pattern": "\\d+",
+                "mask_with": "NUM",
+            },
+        ]
+    },
+    "Proxifier": {
+        "regex": [
+            {
+                "regex_pattern": "<\\d+\\ssec",
+                "mask_with": "NUM-sec",
+            },
+            {
+                "regex_pattern": "([\\w-]+\\.)+[\\w-]+(:\\d+)?",
+                "mask_with": "HOSTNAME",
+            },
+            {
+                "regex_pattern": "\d{2}:\d{2}(:\d{2})*",
+                "mask_with": "TIME",
+            },
+            {
+                "regex_pattern": "[KGTM]B",
+                "mask_with": "SIZE",
+            },
+        ]
+    },
+}
+mask_prefix = "<:"
+mask_suffix = ":>"
+
+
+def gen_masking_instructions(masking_list):
+    masking_instructions = []
+    for mi in masking_list:
+        instruction = MaskingInstruction(mi["regex_pattern"], mi["mask_with"])
+        masking_instructions.append(instruction)
+    return masking_instructions
+
+
 for dataset in datasets:
+    logger.info(f"Processing Start: {dataset}")
+
     in_log_file = download_dataset(dataset)
     df = pd.read_csv(in_log_file)
     lines = df["Content"].tolist()
     template_miner = init_template_miner()
+
+    # マスキング設定の上書き
+    if dataset in benchmark_settings:
+        print("replacing masker")
+        masking_list = benchmark_settings[dataset]["regex"]
+        masking_instructions = gen_masking_instructions(masking_list)
+        template_miner.masker = LogMasker(
+            masking_instructions, mask_prefix, mask_suffix
+        )
+
+    # 学習
     learning(template_miner, lines)
     logger.info(f"Done: {dataset}")
 
-    predicted_template = [predict(line) for line in lines]
+    # 予測
+    predicted_template = [predict(template_miner, line) for line in lines]
     ground_truth = df["EventTemplate"].tolist()
 
     accuracy = calculate_accuracy(ground_truth, predicted_template)
     logger.info(f"Done: {dataset}, accuracy: {accuracy:.2f}")
 
+    # パラメータの抽出
     param_dict = defaultdict(set)
     for line in lines:
         cluster = template_miner.match(line)
