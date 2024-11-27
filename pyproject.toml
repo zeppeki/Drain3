@@ -31,11 +31,12 @@ generate-setup-file = true
 
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = ">=3.9,<4.0"
 jsonpickle = "*"
 cachetools = "*"
 redis = { version = "*", optional = true }
 kafka-python = { version = "*", optional = true }
+pandas = "^2.2.3"
 
 [tool.poetry.extras]
 all=[
