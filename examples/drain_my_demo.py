@@ -201,6 +201,46 @@ benchmark_settings = {
             },
         ]
     },
+    "Spark": {
+        "regex": [
+            {
+                "regex_pattern": "(\\d+\.){3}\\d+",
+                "mask_with": "IP-ADDR",
+            },
+            {
+                "regex_pattern": "\\b[KGTM]?B\\b",
+                "mask_with": "SIZE",
+            },
+            {
+                "regex_pattern": "([\\w-]+\\.){2,}[\\w-]+",
+                "mask_with": "HOSTNAME",
+            },
+        ]
+    },
+    "Thunderbird": {
+        "regex": [
+            {
+                "regex_pattern": "(\d+\.){3}\d+",
+                "mask_with": "IP-ADDR",
+            }
+        ]
+    },
+    "Zookeeper": {
+        "regex": [
+            {
+                "regex_pattern": "'(/|)(\\d+\.){3}\\d+(:\\d+)?'",
+                "mask_with": "IP-ADDR",
+            }
+        ]
+    },
+    "Apache": {
+        "regex": [
+            {
+                "regex_pattern": "(\d+\.){3}\d+",
+                "mask_with": "IP-ADDR",
+            }
+        ]
+    },
 }
 mask_prefix = "<:"
 mask_suffix = ":>"
