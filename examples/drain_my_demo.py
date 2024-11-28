@@ -192,7 +192,7 @@ benchmark_settings = {
                 "mask_with": "HOSTNAME",
             },
             {
-                "regex_pattern": "\d{2}:\d{2}(:\d{2})*",
+                "regex_pattern": "\\d{2}:\\d{2}(:\\d{2})*",
                 "mask_with": "TIME",
             },
             {
@@ -220,7 +220,7 @@ benchmark_settings = {
     "Thunderbird": {
         "regex": [
             {
-                "regex_pattern": "(\d+\.){3}\d+",
+                "regex_pattern": "(\\d+\\.){3}\\d+",
                 "mask_with": "IP-ADDR",
             }
         ]
@@ -236,9 +236,73 @@ benchmark_settings = {
     "Apache": {
         "regex": [
             {
-                "regex_pattern": "(\d+\.){3}\d+",
+                "regex_pattern": "(\\d+\.){3}\\d+",
                 "mask_with": "IP-ADDR",
             }
+        ]
+    },
+    "HealthApp": {
+        "regex": [
+            {
+                "regex_pattern": "\\d+##\\d+##\\d+##\\d+##\\d+##\\d+",
+                "mask_with": "NUM",
+            },
+            {
+                "regex_pattern": "=\\d+",
+                "mask_with": "EQNUM",
+            },
+        ]
+    },
+    "Hadoop": {
+        "regex": [
+            {
+                "regex_pattern": "(\\d+\.){3}\\d+",
+                "mask_with": "IP-ADDR",
+            },
+        ]
+    },
+    "Linux": {
+        "regex": [
+            {
+                "regex_pattern": "(\\d+\.){3}\\d+",
+                "mask_with": "IP-ADDR",
+            },
+            {
+                "regex_pattern": "\\d{2}:\\d{2}:\\d{2}",
+                "mask_with": "TIME",
+            },
+        ]
+    },
+    "Mac": {
+        "regex": [
+            {
+                "regex_pattern": "([\\w-]+\\.){2,}[\\w-]+",
+                "mask_with": "HOSTNAME",
+            },
+        ]
+    },
+    "Windows": {
+        "regex": [
+            {
+                "regex_pattern": "0x.*?\\s",
+                "mask_with": "HEX",
+            },
+        ]
+    },
+    "Android": {
+        "regex": [
+            {
+                "regex_pattern": "(/[\\w-]+)+",
+                "mask_with": "PATH",
+            },
+            {
+                "regex_pattern": "([\\w-]+\\.){2,}[\\w-]+",
+                "mask_with": "HOSTNAME",
+            },
+            {
+                "regex_pattern": "\\b(\\-?\\+?\\d+)\\b|\\b0[Xx][a-fA-F\d]+\\b|\\b[a-fA-F\\d]{4,}\\b",
+                "mask_with": "NUM",
+            },
         ]
     },
 }
