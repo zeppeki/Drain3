@@ -127,7 +127,9 @@ benchmark_settings = {
                 "regex_pattern": "core\\.\\d+",
                 "mask_with": "CORE",
             }
-        ]
+        ],
+        "st": 0.6,
+        "depth": 4,
     },
     "HDFS": {
         "regex": [
@@ -139,7 +141,9 @@ benchmark_settings = {
                 "regex_pattern": "(/|)(\\d+\\.){3}\\d+(:\\d+|)",
                 "mask_with": "IP-ADDR",
             },
-        ]
+        ],
+        "st": 0.5,
+        "depth": 4,
     },
     "HPC": {
         "regex": [
@@ -147,7 +151,9 @@ benchmark_settings = {
                 "regex_pattern": "=\\d+",
                 "mask_with": "EQNUM",
             }
-        ]
+        ],
+        "st": 0.5,
+        "depth": 4,
     },
     "OpenSSH": {
         "regex": [
@@ -159,7 +165,9 @@ benchmark_settings = {
                 "regex_pattern": "([\\w-]+\\.){2,}[\\w-]+",
                 "mask_with": "HOSTNAME",
             },
-        ]
+        ],
+        "st": 0.6,
+        "depth": 5,
     },
     "OpenStack": {
         "regex": [
@@ -179,7 +187,9 @@ benchmark_settings = {
                 "regex_pattern": "\\d+",
                 "mask_with": "NUM",
             },
-        ]
+        ],
+        "st": 0.2,
+        "depth": 4,
     },
     "Proxifier": {
         "regex": [
@@ -199,7 +209,9 @@ benchmark_settings = {
                 "regex_pattern": "[KGTM]B",
                 "mask_with": "SIZE",
             },
-        ]
+        ],
+        "st": 0.6,
+        "depth": 3,
     },
     "Spark": {
         "regex": [
@@ -215,7 +227,9 @@ benchmark_settings = {
                 "regex_pattern": "([\\w-]+\\.){2,}[\\w-]+",
                 "mask_with": "HOSTNAME",
             },
-        ]
+        ],
+        "st": 0.5,
+        "depth": 4,
     },
     "Thunderbird": {
         "regex": [
@@ -223,7 +237,9 @@ benchmark_settings = {
                 "regex_pattern": "(\\d+\\.){3}\\d+",
                 "mask_with": "IP-ADDR",
             }
-        ]
+        ],
+        "st": 0.5,
+        "depth": 4,
     },
     "Zookeeper": {
         "regex": [
@@ -231,7 +247,9 @@ benchmark_settings = {
                 "regex_pattern": "'(/|)(\\d+\.){3}\\d+(:\\d+)?'",
                 "mask_with": "IP-ADDR",
             }
-        ]
+        ],
+        "st": 0.5,
+        "depth": 4,
     },
     "Apache": {
         "regex": [
@@ -239,7 +257,9 @@ benchmark_settings = {
                 "regex_pattern": "(\\d+\.){3}\\d+",
                 "mask_with": "IP-ADDR",
             }
-        ]
+        ],
+        "st": 0.5,
+        "depth": 4,
     },
     "HealthApp": {
         "regex": [
@@ -251,7 +271,9 @@ benchmark_settings = {
                 "regex_pattern": "=\\d+",
                 "mask_with": "EQNUM",
             },
-        ]
+        ],
+        "st": 0.2,
+        "depth": 4,
     },
     "Hadoop": {
         "regex": [
@@ -259,7 +281,9 @@ benchmark_settings = {
                 "regex_pattern": "(\\d+\.){3}\\d+",
                 "mask_with": "IP-ADDR",
             },
-        ]
+        ],
+        "st": 0.5,
+        "depth": 4,
     },
     "Linux": {
         "regex": [
@@ -271,7 +295,9 @@ benchmark_settings = {
                 "regex_pattern": "\\d{2}:\\d{2}:\\d{2}",
                 "mask_with": "TIME",
             },
-        ]
+        ],
+        "st": 0.39,
+        "depth": 6,
     },
     "Mac": {
         "regex": [
@@ -279,7 +305,9 @@ benchmark_settings = {
                 "regex_pattern": "([\\w-]+\\.){2,}[\\w-]+",
                 "mask_with": "HOSTNAME",
             },
-        ]
+        ],
+        "st": 0.7,
+        "depth": 6,
     },
     "Windows": {
         "regex": [
@@ -287,7 +315,9 @@ benchmark_settings = {
                 "regex_pattern": "0x.*?\\s",
                 "mask_with": "HEX",
             },
-        ]
+        ],
+        "st": 0.7,
+        "depth": 5,
     },
     "Android": {
         "regex": [
@@ -303,7 +333,9 @@ benchmark_settings = {
                 "regex_pattern": "\\b(\\-?\\+?\\d+)\\b|\\b0[Xx][a-fA-F\d]+\\b|\\b[a-fA-F\\d]{4,}\\b",
                 "mask_with": "NUM",
             },
-        ]
+        ],
+        "st": 0.2,
+        "depth": 6,
     },
 }
 mask_prefix = "<:"
@@ -334,6 +366,14 @@ for dataset in datasets:
         template_miner.masker = LogMasker(
             masking_instructions, mask_prefix, mask_suffix
         )
+
+        st = benchmark_settings[dataset].get("st")
+        if st:
+            template_miner.drain.sim_th = st
+        depth = benchmark_settings[dataset].get("depth")
+        if depth:
+            template_miner.drain.log_cluster_depth = depth
+            template_miner.drain.max_node_depth = depth - 2
 
     # 学習
     learning(template_miner, lines)
